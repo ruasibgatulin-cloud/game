@@ -212,7 +212,7 @@ h2{font:500 36px/1.1 var(--serif);margin:0}
       </div>
     </div>
   </div>
-  <div class="panel panel-row">
+  <div class="panel panel-row" hidden>
     <div class="label">Руки уже связаны</div>
     <button class="switch" id="boundHome" role="switch" aria-checked="false" aria-label="Руки уже связаны"></button>
   </div>
@@ -654,12 +654,11 @@ const PRICES = [
 const FINAL = {k:'final',l:3,n:'Финал',t:'Два оргазма подряд без паузы: первый от пингвина, второй от твоего рта и фиолетового дилдо. Все запреты сняты, просто дай ей кончить.',up:[[1,'Руки привязаны, ноги разведены.'],[2,'Чёрный дилдо вместо фиолетового.'],[3,'Три оргазма подряд.'],[4,'В ней пробка.'],[5,'Четыре оргазма, пока она не взмолится остановиться.']]};
 /* Первая карта каждой ночи: порог, ошейник, поводок */
 const THRESHOLD = {k:'him',l:1,n:'Порог',open:1,t:'Она раздевается прямо у порога — сразу, без слова. Ты завязываешь ей глаза, застёгиваешь ошейник и пристёгиваешь поводок. Она встаёт в позу ожидания: на коленях, колени врозь, ладони на бёдрах, голова опущена. Руки свободны — дальше ей ползти.',up:[[1,'Зажимы на соски.'],[2,'Новые зажимы — на половые губы.'],[3,'Она говорит «я готова, хозяин» — и получает кляп.']]};
-/* Стандартное начало: после «Порога» всегда прогулка, позы, пальцы и поцелуи. В каждом слоте один из двух вариантов */
 /* Стандартное начало ночи: порог → прогулка на поводке → зеркало → развратная поза. Дальше обычная игра */
 const OPENING = [
 [{k:'him',l:1,n:'Прогулка',open:1,t:'Веди её по квартире за поводок на четвереньках: коридор, кухня, ванная — и в комнату с зеркалом. Зажимы остаются с прошлой карты. В каждой комнате она замирает и ждёт, пока ты не потянешь поводок.',s:180,up:[[3,'Пока ведёшь — порешь её стеком по заднице и бёдрам.']]}],
 [{k:'him',l:1,n:'У зеркала',open:1,bind:1,t:'Вы в комнате с зеркалом. Зажимы не снимаешь. Свяжи ей руки, поставь перед зеркалом и подними одну её ногу на стул. Ласкай её и рассказывай, что видно в зеркале. Повязку она не снимает.',s:180,up:[[1,'Время от времени тяни за зажимы.'],[3,'Кончать ей нельзя.']]}],
-[{k:'him',l:1,n:'Развратная поза',open:1,t:'Поставь её в развратную позу: на колени, грудь вниз, попка вверх, колени широко. Медленно введи ей анальные шарики или пробку. Потом ласкай её пальцами до самого края и останавливайся — кончать нельзя.',s:240,up:[[1,'Потяни за зажимы, когда она будет на краю.'],[2,'Шарики и в киску тоже.'],[3,'Три раза до края, ни разу дальше.']]}],
+[{k:'him',l:1,n:'Верхом на лице',open:1,face:1,t:'Ляг на спину и посади её себе на лицо, лицом к твоим ногам, — так её попка прямо перед тобой. Лижи её и медленно введи анальные шарики или пробку. Потом ласкай языком и пальцами до самого края и останавливайся — кончать нельзя.',s:240,up:[[1,'Потяни за зажимы, когда она будет на краю.'],[2,'Шарики и в киску тоже.'],[3,'Три раза до края, ни разу дальше.']]}],
 [{k:'him',l:1,n:'Пара кругов',open:1,t:'Подними её на ноги — шарики или пробка остаются внутри. Проведи её за поводок пару кругов по комнате: медленно, шаг за шагом, чтобы она чувствовала каждое движение. Выпало — возвращаешь на место, и круг заново. Последний круг заканчивается у кровати.',s:120,up:[[1,'Тяни поводок, когда она замедляется.'],[2,'На каждом углу — шлепок.'],[3,'Последний круг — на носочках.']]}],
 [{k:'him',l:1,n:'Через колено',open:1,t:'Сядь на край кровати и уложи её себе на колени. Если кляпа ещё нет — вставь. Шлёпай по заднице, а она пытается считать через кляп. Невнятно — не засчитано. До двадцати.',up:[[1,'Пробка или шарики внутри — между шлепками придерживай их ладонью.'],[2,'До тридцати.'],[3,'Каждый пятый — стеком.']]}]
 ];
@@ -838,7 +837,7 @@ function setBound(v){
 }
 
 /* Тема карты: по ней следим, чтобы в одной игре не было много похожих и они не шли подряд */
-const isHand = c => c.up===UF || c.n==='Пальцы и рот' || c.n==='Обе руки' || c.n==='Пальцы в рот';
+const isHand = c => (!!c.up && !!c.up[0] && c.up[0][1]===UF[0][1]) || c.n==='Пальцы и рот' || c.n==='Обе руки' || c.n==='Пальцы в рот';
 function tagOf(c){
   if(!c||!c.n||!c.t) return '';
   const s = (c.n+' '+c.t).toLowerCase();
@@ -969,7 +968,7 @@ const REWARDS = [
 ];
 function pickReward(){
   const used = game.rw||(game.rw=[]);
-  const ok = r => !r.unknot||score>0;
+  const ok = r => true;
   let pool = REWARDS.filter(r=>ok(r)&&!used.includes(r.n));
   if(!pool.length) pool = REWARDS.filter(ok);
   const r = pool[Math.floor(Math.random()*pool.length)];
@@ -1021,7 +1020,6 @@ function capOral(q){
 }
 /* Его ласк руками больше: 2, 4 или 6 за игру по длине */
 function moreHands(q){
-  const isHand = c => c.up===UF || c.n==='Пальцы и рот' || c.n==='Обе руки' || c.n==='Пальцы в рот';
   const want = settings.len>=40 ? 6 : settings.len>=28 ? 4 : 2;
   let have = q.filter(isHand).length;
   const inQueue = new Set(q.map(c=>c.n));
@@ -1169,11 +1167,10 @@ function advance(skipped){
   const st=game.stats||(game.stats={done:0,skip:0,pun:0,k0:score});
   if(skipped) st.skip++; else if(!isExtra(c)) st.done++;
   Sound[skipped?'skip':'done']();
-  if(!isExtra(c)&&game.ban>0&&game.ban<99) game.ban--;
+  if(!skipped&&!isExtra(c)&&game.ban>0&&game.ban<99) game.ban--;
   if(!skipped){
     if(c.bind) setBound(true);
     if(c.ban) game.ban = Math.max(game.ban,c.ban);
-    if(c.unknot&&score>0){ setScore(score-1); toast('Узел развязан. Теперь '+score+' из '+MAX_KNOTS); }
     if(c.unban) game.ban = 0;
   }
   if(c.k==='her'||c.k==='him'){
@@ -1194,13 +1191,14 @@ function punish(){
   const tier = tierOf(score);
   /* Не повторяем наказания и не даём такие же, как карты этой игры; кончились — берём соседний уровень */
   const inGame = new Set(game.q.map(x=>x.n));
-  const byTier = t => CARDS.map((c,i)=>[c,i]).filter(([c,i])=>c.k==='punish'&&c.tier===t&&!game.used.includes(i)&&!inGame.has(c.n));
+  const byTier = t => CARDS.map((c,i)=>[c,i]).filter(([c,i])=>c.k==='punish'&&c.tier===t&&!game.used.includes(c.n)&&!game.used.includes(i)&&!inGame.has(c.n));
   let fresh = byTier(tier);
   for(const d of [1,-1,2,-2]) if(!fresh.length) fresh = byTier(Math.max(0,Math.min(MAX_KNOTS,tier+d)));
   if(!fresh.length) fresh = CARDS.map((c,i)=>[c,i]).filter(([c])=>c.k==='punish'&&c.tier===tier);
+  if(!fresh.length){ toast('Наказаний для этого уровня нет'); return; }
   game.streak = 0;
   const [card,idx] = fresh[Math.floor(Math.random()*fresh.length)];
-  game.used.push(idx);
+  game.used.push(card.n);
   (game.stats||(game.stats={done:0,skip:0,pun:0,k0:score})).pun++;
   Sound.knot();
   const wasMax = score>=MAX_KNOTS;
@@ -1405,7 +1403,7 @@ $('#handsChip').onclick = ()=>{
   setBound(!settings.bound);
   if($('#card').classList.contains('flipped')){
     const c = game.q[game.i];
-    $('#handsBox').hidden = !(settings.bound&&c.k==='her'&&c.h);
+    $('#handsBox').hidden = !(settings.bound&&(c.k==='her'||c.k==='price')&&c.h);
   } else render();
 };
 $('#resumeBtn').onclick = ()=>{
@@ -1462,8 +1460,14 @@ $('#contBtn').onclick = ()=>{
   pending = null;
   closeOverlays();
 };
-$('#cancelPauseBtn').onclick = ()=>{ pending = null; closeOverlays(); };
-$('#endBtn').onclick = finish;
+$('#cancelPauseBtn').onclick = ()=>{ if(game&&game.pu) game.pu.pop(); pending = null; closeOverlays(); };
+/* Закончить игру — только со второго нажатия, чтобы случайно не стереть вечер */
+$('#endBtn').onclick = ()=>{
+  const b = $('#endBtn');
+  if(b.dataset.sure){ clearTimeout(b._t); delete b.dataset.sure; b.textContent = b.dataset.label; finish(); return; }
+  b.dataset.label = b.textContent; b.dataset.sure = 1; b.textContent = 'Точно закончить? Нажми ещё раз';
+  b._t = setTimeout(()=>{ delete b.dataset.sure; b.textContent = b.dataset.label; },3000);
+};
 function refreshHome(){ $('#resumeBtn').hidden = !store.get('uzel-game3'); paintFound(); }
 
 drawKnots(); drawSigil(); paintScore(); paintLen(); setBound(settings.bound); refreshHome(); paintSound();
